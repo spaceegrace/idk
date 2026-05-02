@@ -296,23 +296,23 @@
                     </div>
                     <ul class="checklist" id="phase1">
                         <li>
-                            <input type="checkbox" id="phase1-1">
+                            <input type="checkbox" class="task-checkbox" data-task="phase1-1">
                             <span>Prioritize PHP (Partial Hospitalization Program) as your primary focus</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-2">
+                            <input type="checkbox" class="task-checkbox" data-task="phase1-2">
                             <span>Maintain 1-class-per-term strategy to prevent burnout</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-3">
+                            <input type="checkbox" class="task-checkbox" data-task="phase1-3">
                             <span>Secure autism/neurodivergence diagnosis documentation</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-4">
+                            <input type="checkbox" class="task-checkbox" data-task="phase1-4">
                             <span>File paperwork with Office of Disability Services for formal accommodations</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-5">
+                            <input type="checkbox" class="task-checkbox" data-task="phase1-5">
                             <span>Create a sensory-safe, predictable home environment</span>
                         </li>
                     </ul>
@@ -328,23 +328,23 @@
                     </div>
                     <ul class="checklist" id="phase2">
                         <li>
-                            <input type="checkbox" id="phase2-1">
+                            <input type="checkbox" class="task-checkbox" data-task="phase2-1">
                             <span>Transition from PHP to outpatient care at your own pace</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-2">
+                            <input type="checkbox" class="task-checkbox" data-task="phase2-2">
                             <span>Engage with passive technical learning (1-2 hours/week if energy permits)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-3">
+                            <input type="checkbox" class="task-checkbox" data-task="phase2-3">
                             <span>Research sensory-friendly career paths (Accessibility Engineering, Backend Data Architecture)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-4">
+                            <input type="checkbox" class="task-checkbox" data-task="phase2-4">
                             <span>Develop emotional regulation protocols using logical frameworks</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-5">
+                            <input type="checkbox" class="task-checkbox" data-task="phase2-5">
                             <span>Check in with therapy team about progress and adjustments needed</span>
                         </li>
                     </ul>
@@ -360,23 +360,23 @@
                     </div>
                     <ul class="checklist" id="phase3">
                         <li>
-                            <input type="checkbox" id="phase3-1">
+                            <input type="checkbox" class="task-checkbox" data-task="phase3-1">
                             <span>Evaluate course load—consider 2 classes ONLY if symptoms are stable</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-2">
+                            <input type="checkbox" class="task-checkbox" data-task="phase3-2">
                             <span>Build your "quiet" portfolio showcasing technical skills and unique perspective</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-3">
+                            <input type="checkbox" class="task-checkbox" data-task="phase3-3">
                             <span>Connect with neurodivergent tech communities (Mentra, SAP Autism at Work, etc.)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-4">
+                            <input type="checkbox" class="task-checkbox" data-task="phase3-4">
                             <span>Plan next steps with your support team</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-5">
+                            <input type="checkbox" class="task-checkbox" data-task="phase3-5">
                             <span>Celebrate your resilience and acknowledge your progress</span>
                         </li>
                     </ul>
@@ -423,82 +423,55 @@
     </div>
     
     <script>
-        // Load progress immediately when page starts loading
-        function loadProgress() {
-            try {
-                const saved = localStorage.getItem('healingJourneyProgress');
-                if (saved) {
-                    const progress = JSON.parse(saved);
-                    Object.keys(progress).forEach(id => {
-                        const checkbox = document.getElementById(id);
-                        if (checkbox) {
-                            checkbox.checked = progress[id];
-                        }
-                    });
-                }
-            } catch (e) {
-                console.log('Could not load progress:', e);
-            }
+        const STORAGE_KEY = 'healingJourneyProgress';
+        
+        function saveCheckboxState(taskId, isChecked) {
+            let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            data[taskId] = isChecked;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
         
-        // Set up event listeners for all checkboxes
-        function setupCheckboxListeners() {
-            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-            allCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    updateProgress();
-                });
+        function loadCheckboxStates() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                const taskId = checkbox.getAttribute('data-task');
+                if (taskId && data[taskId] !== undefined) {
+                    checkbox.checked = data[taskId];
+                }
+            });
+            updateAllProgress();
+        }
+        
+        function updateAllProgress() {
+            ['phase1', 'phase2', 'phase3'].forEach(phaseId => {
+                updatePhaseProgress(phaseId);
             });
         }
         
-        function updateProgress() {
-            // Update all phases
-            updatePhaseProgress('phase1', 5);
-            updatePhaseProgress('phase2', 5);
-            updatePhaseProgress('phase3', 5);
-            
-            // Save immediately
-            saveProgress();
-        }
-        
-        function updatePhaseProgress(phaseId, totalItems) {
+        function updatePhaseProgress(phaseId) {
             const phase = document.getElementById(phaseId);
-            const checkboxes = phase.querySelectorAll('input[type="checkbox"]');
+            const checkboxes = phase.querySelectorAll('.task-checkbox');
             const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const totalCount = checkboxes.length;
             
             const progressBar = phase.querySelector('.progress-fill');
             const progressText = phase.querySelector('.phase-progress');
             
-            const percentage = (checkedCount / totalItems) * 100;
+            const percentage = (checkedCount / totalCount) * 100;
             progressBar.style.width = percentage + '%';
             progressText.textContent = checkedCount;
         }
         
-        function saveProgress() {
-            try {
-                const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-                const progress = {};
-                allCheckboxes.forEach((cb) => {
-                    progress[cb.id] = cb.checked;
-                });
-                localStorage.setItem('healingJourneyProgress', JSON.stringify(progress));
-            } catch (e) {
-                console.log('Could not save progress:', e);
-            }
-        }
-        
-        // Load progress and set up listeners when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                loadProgress();
-                setupCheckboxListeners();
-                updateProgress();
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const taskId = this.getAttribute('data-task');
+                saveCheckboxState(taskId, this.checked);
+                updateAllProgress();
             });
-        } else {
-            loadProgress();
-            setupCheckboxListeners();
-            updateProgress();
-        }
+        });
+        
+        window.addEventListener('DOMContentLoaded', loadCheckboxStates);
+        loadCheckboxStates();
     </script>
 </body>
 </html>
