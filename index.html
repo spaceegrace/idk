@@ -280,7 +280,7 @@
             <div class="section">
                 <h2>💜 Welcome</h2>
                 <p class="welcome-text">
-                    This is your personal sanctuary—a safe space to track your progress, celebrate your wins, and honor your healing journey. Return here whenever you need to remember how far you've come and where you're going. You are stronger than you know. 🌱
+                    This is your personal sanctuary—a safe space to track your progress, celebrate your wins, and honor your healing journey. Return here whenever you need to remember how far you've come. You are stronger than you know. 🌱
                 </p>
             </div>
             
@@ -296,23 +296,23 @@
                     </div>
                     <ul class="checklist" id="phase1">
                         <li>
-                            <input type="checkbox" id="phase1-1" onchange="updateProgress()">
+                            <input type="checkbox" id="phase1-1">
                             <span>Prioritize PHP (Partial Hospitalization Program) as your primary focus</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-2" onchange="updateProgress()">
+                            <input type="checkbox" id="phase1-2">
                             <span>Maintain 1-class-per-term strategy to prevent burnout</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-3" onchange="updateProgress()">
+                            <input type="checkbox" id="phase1-3">
                             <span>Secure autism/neurodivergence diagnosis documentation</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-4" onchange="updateProgress()">
+                            <input type="checkbox" id="phase1-4">
                             <span>File paperwork with Office of Disability Services for formal accommodations</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase1-5" onchange="updateProgress()">
+                            <input type="checkbox" id="phase1-5">
                             <span>Create a sensory-safe, predictable home environment</span>
                         </li>
                     </ul>
@@ -328,23 +328,23 @@
                     </div>
                     <ul class="checklist" id="phase2">
                         <li>
-                            <input type="checkbox" id="phase2-1" onchange="updateProgress()">
+                            <input type="checkbox" id="phase2-1">
                             <span>Transition from PHP to outpatient care at your own pace</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-2" onchange="updateProgress()">
+                            <input type="checkbox" id="phase2-2">
                             <span>Engage with passive technical learning (1-2 hours/week if energy permits)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-3" onchange="updateProgress()">
+                            <input type="checkbox" id="phase2-3">
                             <span>Research sensory-friendly career paths (Accessibility Engineering, Backend Data Architecture)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-4" onchange="updateProgress()">
+                            <input type="checkbox" id="phase2-4">
                             <span>Develop emotional regulation protocols using logical frameworks</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase2-5" onchange="updateProgress()">
+                            <input type="checkbox" id="phase2-5">
                             <span>Check in with therapy team about progress and adjustments needed</span>
                         </li>
                     </ul>
@@ -360,23 +360,23 @@
                     </div>
                     <ul class="checklist" id="phase3">
                         <li>
-                            <input type="checkbox" id="phase3-1" onchange="updateProgress()">
+                            <input type="checkbox" id="phase3-1">
                             <span>Evaluate course load—consider 2 classes ONLY if symptoms are stable</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-2" onchange="updateProgress()">
+                            <input type="checkbox" id="phase3-2">
                             <span>Build your "quiet" portfolio showcasing technical skills and unique perspective</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-3" onchange="updateProgress()">
+                            <input type="checkbox" id="phase3-3">
                             <span>Connect with neurodivergent tech communities (Mentra, SAP Autism at Work, etc.)</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-4" onchange="updateProgress()">
+                            <input type="checkbox" id="phase3-4">
                             <span>Plan next steps with your support team</span>
                         </li>
                         <li>
-                            <input type="checkbox" id="phase3-5" onchange="updateProgress()">
+                            <input type="checkbox" id="phase3-5">
                             <span>Celebrate your resilience and acknowledge your progress</span>
                         </li>
                     </ul>
@@ -423,11 +423,42 @@
     </div>
     
     <script>
+        // Load progress immediately when page starts loading
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('healingJourneyProgress');
+                if (saved) {
+                    const progress = JSON.parse(saved);
+                    Object.keys(progress).forEach(id => {
+                        const checkbox = document.getElementById(id);
+                        if (checkbox) {
+                            checkbox.checked = progress[id];
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('Could not load progress:', e);
+            }
+        }
+        
+        // Set up event listeners for all checkboxes
+        function setupCheckboxListeners() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            allCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateProgress();
+                });
+            });
+        }
+        
         function updateProgress() {
             // Update all phases
             updatePhaseProgress('phase1', 5);
             updatePhaseProgress('phase2', 5);
             updatePhaseProgress('phase3', 5);
+            
+            // Save immediately
+            saveProgress();
         }
         
         function updatePhaseProgress(phaseId, totalItems) {
@@ -441,36 +472,33 @@
             const percentage = (checkedCount / totalItems) * 100;
             progressBar.style.width = percentage + '%';
             progressText.textContent = checkedCount;
-            
-            // Save to localStorage for persistence
-            saveProgress();
         }
         
         function saveProgress() {
-            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-            const progress = {};
-            allCheckboxes.forEach((cb, index) => {
-                progress[cb.id] = cb.checked;
-            });
-            localStorage.setItem('healingJourneyProgress', JSON.stringify(progress));
-        }
-        
-        function loadProgress() {
-            const saved = localStorage.getItem('healingJourneyProgress');
-            if (saved) {
-                const progress = JSON.parse(saved);
-                Object.keys(progress).forEach(id => {
-                    const checkbox = document.getElementById(id);
-                    if (checkbox) {
-                        checkbox.checked = progress[id];
-                    }
+            try {
+                const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+                const progress = {};
+                allCheckboxes.forEach((cb) => {
+                    progress[cb.id] = cb.checked;
                 });
-                updateProgress();
+                localStorage.setItem('healingJourneyProgress', JSON.stringify(progress));
+            } catch (e) {
+                console.log('Could not save progress:', e);
             }
         }
         
-        // Load progress on page load
-        window.addEventListener('load', loadProgress);
+        // Load progress and set up listeners when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                loadProgress();
+                setupCheckboxListeners();
+                updateProgress();
+            });
+        } else {
+            loadProgress();
+            setupCheckboxListeners();
+            updateProgress();
+        }
     </script>
 </body>
 </html>
